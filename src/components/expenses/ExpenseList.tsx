@@ -10,7 +10,7 @@ import {
   formatCurrency,
   calculateTotalExpense 
 } from '@/lib/expense-utils';
-import { CATEGORY_CONFIG } from '@/types/expense';
+import { CATEGORY_CONFIG, OWNER_CONFIG } from '@/types/expense';
 import { cn } from '@/lib/utils';
 
 export function ExpenseList() {
@@ -82,6 +82,16 @@ export function ExpenseList() {
                         <span className="font-medium">
                           {CATEGORY_CONFIG[expense.category].label}
                         </span>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs px-1.5 py-0"
+                          style={{ 
+                            borderColor: OWNER_CONFIG[expense.owner].color,
+                            color: OWNER_CONFIG[expense.owner].color
+                          }}
+                        >
+                          {OWNER_CONFIG[expense.owner].icon} {OWNER_CONFIG[expense.owner].label}
+                        </Badge>
                         {expense.isRecurring && (
                           <RefreshCw className="h-3 w-3 text-muted-foreground" />
                         )}

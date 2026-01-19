@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useExpenses } from '@/context/ExpenseContext';
-import { CATEGORY_CONFIG } from '@/types/expense';
+import { CATEGORY_CONFIG, OWNER_CONFIG } from '@/types/expense';
 import { formatCurrency, formatDate } from '@/lib/expense-utils';
 
 export function RecurringManager() {
@@ -52,6 +52,16 @@ export function RecurringManager() {
                   </span>
                   <Badge variant="outline" className="text-xs">
                     {template.frequency}
+                  </Badge>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs"
+                    style={{ 
+                      borderColor: OWNER_CONFIG[template.owner].color,
+                      color: OWNER_CONFIG[template.owner].color
+                    }}
+                  >
+                    {OWNER_CONFIG[template.owner].icon}
                   </Badge>
                   {!template.isActive && (
                     <Badge variant="secondary" className="text-xs">

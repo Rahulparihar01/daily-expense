@@ -8,6 +8,8 @@ export type ExpenseCategory =
   | 'shopping'
   | 'other';
 
+export type ExpenseOwner = 'husband' | 'wife';
+
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | null;
 
 export interface Expense {
@@ -16,17 +18,26 @@ export interface Expense {
   category: ExpenseCategory;
   amount: number;
   description?: string;
+  owner: ExpenseOwner;
   isRecurring: boolean;
   recurringFrequency: RecurringFrequency;
   recurringTemplateId?: string;
   createdAt: string;
 }
 
+export const OWNER_CONFIG: Record<ExpenseOwner, { label: string; icon: string; color: string }> = {
+  husband: { label: 'Husband', icon: '👨', color: 'hsl(210, 70%, 50%)' },
+  wife: { label: 'Wife', icon: '👩', color: 'hsl(330, 70%, 55%)' },
+};
+
+export const ALL_OWNERS: ExpenseOwner[] = ['husband', 'wife'];
+
 export interface RecurringTemplate {
   id: string;
   category: ExpenseCategory;
   amount: number;
   description?: string;
+  owner: ExpenseOwner;
   frequency: 'daily' | 'weekly' | 'monthly';
   startDate: string;
   lastGenerated?: string;

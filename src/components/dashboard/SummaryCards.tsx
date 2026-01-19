@@ -1,8 +1,9 @@
-import { Wallet, CalendarDays, PieChart, AlertTriangle } from 'lucide-react';
+import { Wallet, CalendarDays, User, Users } from 'lucide-react';
 import { SummaryCard } from './SummaryCard';
 import { useExpenseStats } from '@/hooks/useExpenseStats';
 import { useExpenses } from '@/context/ExpenseContext';
 import { format, parseISO } from 'date-fns';
+import { OWNER_CONFIG } from '@/types/expense';
 
 export function SummaryCards() {
   const { currentMonth } = useExpenses();
@@ -27,24 +28,18 @@ export function SummaryCards() {
         variant="default"
       />
       <SummaryCard
-        title="Categories Used"
-        value={`${stats.categoryCount} / 8`}
-        subtitle={`${stats.expenseCount} total entries`}
-        icon={PieChart}
+        title={`${OWNER_CONFIG.husband.icon} Husband`}
+        value={stats.husbandTotal}
+        subtitle={`${stats.husbandExpenseCount} expenses`}
+        icon={User}
         variant="default"
       />
       <SummaryCard
-        title="Budget Alerts"
-        value={stats.overBudgetCount + stats.warningBudgetCount}
-        subtitle={
-          stats.overBudgetCount > 0 
-            ? `${stats.overBudgetCount} over budget` 
-            : stats.warningBudgetCount > 0 
-              ? `${stats.warningBudgetCount} approaching limit`
-              : 'All budgets on track'
-        }
-        icon={AlertTriangle}
-        variant={stats.overBudgetCount > 0 ? 'danger' : stats.warningBudgetCount > 0 ? 'warning' : 'success'}
+        title={`${OWNER_CONFIG.wife.icon} Wife`}
+        value={stats.wifeTotal}
+        subtitle={`${stats.wifeExpenseCount} expenses`}
+        icon={Users}
+        variant="default"
       />
     </div>
   );
