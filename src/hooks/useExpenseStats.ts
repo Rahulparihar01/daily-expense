@@ -9,7 +9,7 @@ import {
   getBudgetStatus,
   getBudgetPercentage
 } from '@/lib/expense-utils';
-import { ExpenseCategory } from '@/types/expense';
+import { ExpenseCategory, ExpenseOwner } from '@/types/expense';
 
 export function useFilteredExpenses() {
   const { expenses, filters } = useExpenses();
@@ -28,6 +28,12 @@ export function useExpenseStats() {
     const todayTotal = calculateTotalExpense(todayExpenses);
     const categoryTotals = calculateCategoryTotals(expenses);
     const categoryCount = Object.values(categoryTotals).filter(v => v > 0).length;
+    
+    // Owner-wise totals
+    const husbandExpenses = expenses.filter(e => e.owner === 'husband');
+    const wifeExpenses = expenses.filter(e => e.owner === 'wife');
+    const husbandTotal = calculateTotalExpense(husbandExpenses);
+    const wifeTotal = calculateTotalExpense(wifeExpenses);
     
     // Budget analysis
     const budgetAnalysis = budgets.map(budget => {
@@ -55,6 +61,10 @@ export function useExpenseStats() {
       overBudgetCount,
       warningBudgetCount,
       expenseCount: expenses.length,
+      husbandTotal,
+      wifeTotal,
+      husbandExpenseCount: husbandExpenses.length,
+      wifeExpenseCount: wifeExpenses.length,
     };
   }, [expenses, filteredExpenses, budgets]);
 }

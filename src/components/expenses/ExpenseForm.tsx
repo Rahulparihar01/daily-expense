@@ -30,13 +30,14 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useExpenses } from '@/context/ExpenseContext';
-import { ALL_CATEGORIES, CATEGORY_CONFIG } from '@/types/expense';
+import { ALL_CATEGORIES, CATEGORY_CONFIG, ALL_OWNERS, OWNER_CONFIG, ExpenseOwner } from '@/types/expense';
 import { getTodayString } from '@/lib/expense-utils';
 import { useToast } from '@/hooks/use-toast';
 
 const expenseSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   category: z.enum(['milk', 'food', 'transport', 'utilities', 'entertainment', 'healthcare', 'shopping', 'other']),
+  owner: z.enum(['husband', 'wife']),
   amount: z.string().min(1, 'Amount is required').transform(val => parseFloat(val)),
   description: z.string().optional(),
   isRecurring: z.boolean().default(false),
@@ -59,6 +60,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
     defaultValues: {
       date: getTodayString(),
       category: 'food',
+      owner: 'husband',
       amount: '' as any,
       description: '',
       isRecurring: false,
@@ -75,6 +77,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
         category: data.category,
         amount: data.amount,
         description: data.description,
+        owner: data.owner,
         frequency: data.recurringFrequency,
         startDate: data.date,
         isActive: true,
@@ -91,19 +94,21 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
         category: data.category,
         amount: data.amount,
         description: data.description,
+        owner: data.owner,
         isRecurring: false,
         recurringFrequency: null,
       });
       
       toast({
         title: 'Expense added',
-        description: `${CATEGORY_CONFIG[data.category].icon} ₹${data.amount} added to ${CATEGORY_CONFIG[data.category].label}`,
+        description: `${OWNER_CONFIG[data.owner].icon} ₹${data.amount} added to ${CATEGORY_CONFIG[data.category].label}`,
       });
     }
 
     form.reset({
       date: getTodayString(),
       category: 'food',
+      owner: 'husband',
       amount: '' as any,
       description: '',
       isRecurring: false,
@@ -167,6 +172,34 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="owner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Who spent?</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select person" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ALL_OWNERS.map(owner => (
+                        <SelectItem key={owner} value={owner}>
+                          <span className="flex items-center gap-2">
+                            <span>{OWNER_CONFIG[owner].icon}</span>
+                            <span>{OWNER_CONFIG[owner].label}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
