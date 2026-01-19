@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ExpenseProvider } from '@/context/ExpenseContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { ExpenseFilters } from '@/components/filters/ExpenseFilters';
@@ -9,8 +8,20 @@ import { DailyExpenseChart } from '@/components/charts/DailyExpenseChart';
 import { BudgetManager } from '@/components/budget/BudgetManager';
 import { RecurringManager } from '@/components/recurring/RecurringManager';
 import { DataManager } from '@/components/data/DataManager';
+import { useExpenses } from '@/context/ExpenseContext';
+import { Loader2 } from 'lucide-react';
 
 function DashboardContent() {
+  const { loading } = useExpenses();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -45,11 +56,9 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
 
   return (
-    <ExpenseProvider>
-      <DashboardLayout activeSection={activeSection} onSectionChange={setActiveSection}>
-        <DashboardContent />
-      </DashboardLayout>
-    </ExpenseProvider>
+    <DashboardLayout activeSection={activeSection} onSectionChange={setActiveSection}>
+      <DashboardContent />
+    </DashboardLayout>
   );
 };
 

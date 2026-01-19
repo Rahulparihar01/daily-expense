@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, Settings, Wallet } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, LogOut, Wallet } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,7 @@ import {
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 const menuItems = [
   { title: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
@@ -27,6 +28,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
   const { state } = useSidebar();
+  const { signOut, user } = useAuth();
   const isCollapsed = state === 'collapsed';
 
   return (
@@ -92,12 +94,21 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        {!isCollapsed && (
-          <p className="text-xs text-sidebar-foreground/40 text-center">
-            © 2026 ExpenseTrack
+      <SidebarFooter className="p-4 space-y-3">
+        {!isCollapsed && user && (
+          <p className="text-xs text-sidebar-foreground/60 truncate text-center">
+            {user.email}
           </p>
         )}
+        <Button 
+          variant="outline" 
+          size={isCollapsed ? "icon" : "default"}
+          className={cn("w-full", isCollapsed && "h-10 w-10")}
+          onClick={signOut}
+        >
+          <LogOut className="h-4 w-4" />
+          {!isCollapsed && <span className="ml-2">Sign Out</span>}
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
