@@ -28,7 +28,7 @@ export function useExpenseDatabase(currentMonth: string) {
       .order('date', { ascending: false });
 
     if (error) {
-      console.error('Error fetching expenses:', error);
+      if (import.meta.env.DEV) console.error('Error fetching expenses:', error);
       return;
     }
 
@@ -56,7 +56,7 @@ export function useExpenseDatabase(currentMonth: string) {
       .eq('month', currentMonth);
 
     if (error) {
-      console.error('Error fetching budgets:', error);
+      if (import.meta.env.DEV) console.error('Error fetching budgets:', error);
       return;
     }
 
@@ -76,7 +76,7 @@ export function useExpenseDatabase(currentMonth: string) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching recurring templates:', error);
+      if (import.meta.env.DEV) console.error('Error fetching recurring templates:', error);
       return;
     }
 
