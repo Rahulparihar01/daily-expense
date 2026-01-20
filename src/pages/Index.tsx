@@ -8,6 +8,7 @@ import { DailyExpenseChart } from '@/components/charts/DailyExpenseChart';
 import { BudgetManager } from '@/components/budget/BudgetManager';
 import { RecurringManager } from '@/components/recurring/RecurringManager';
 import { DataManager } from '@/components/data/DataManager';
+import { ExpenseHistory } from '@/components/history/ExpenseHistory';
 import { useExpenses } from '@/context/ExpenseContext';
 import { Loader2 } from 'lucide-react';
 
@@ -52,12 +53,35 @@ function DashboardContent() {
   );
 }
 
+function HistoryContent() {
+  const { loading } = useExpenses();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return <ExpenseHistory />;
+}
+
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
 
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'history':
+        return <HistoryContent />;
+      default:
+        return <DashboardContent />;
+    }
+  };
+
   return (
     <DashboardLayout activeSection={activeSection} onSectionChange={setActiveSection}>
-      <DashboardContent />
+      {renderContent()}
     </DashboardLayout>
   );
 };
