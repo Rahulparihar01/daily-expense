@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useExpenses } from '@/context/ExpenseContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { 
   groupExpensesByDate, 
   formatDate, 
@@ -19,6 +20,7 @@ type OwnerFilter = 'all' | ExpenseOwner;
 
 export function ExpenseHistory() {
   const { expenses, deleteExpense } = useExpenses();
+  const { canModifyExpense } = useUserRole();
   const [ownerFilter, setOwnerFilter] = useState<OwnerFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -138,62 +140,68 @@ export function ExpenseHistory() {
                   </div>
                   
                   <div className="space-y-2">
-                    {dayExpenses.map(expense => (
-                      <div 
-                        key={expense.id}
-                        className={cn(
-                          'flex items-center gap-3 p-3 rounded-lg bg-secondary/30',
-                          'transition-all duration-200 hover:bg-secondary/50 group'
-                        )}
-                      >
+                    {dayExpenses.map(expense => {
+                      const canDelete = canModifyExpense(expense.owner);
+                      
+                      return (
                         <div 
-                          className="h-10 w-10 rounded-lg flex items-center justify-center text-lg"
-                          style={{ backgroundColor: `${CATEGORY_CONFIG[expense.category].color}20` }}
+                          key={expense.id}
+                          className={cn(
+                            'flex items-center gap-3 p-3 rounded-lg bg-secondary/30',
+                            'transition-all duration-200 hover:bg-secondary/50 group'
+                          )}
                         >
-                          {CATEGORY_CONFIG[expense.category].icon}
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                              {CATEGORY_CONFIG[expense.category].label}
-                            </span>
-                            <Badge 
-                              variant="outline" 
-                              className="text-xs px-1.5 py-0"
-                              style={{ 
-                                borderColor: OWNER_CONFIG[expense.owner].color,
-                                color: OWNER_CONFIG[expense.owner].color
-                              }}
-                            >
-                              {OWNER_CONFIG[expense.owner].icon} {OWNER_CONFIG[expense.owner].label}
-                            </Badge>
-                            {expense.isRecurring && (
-                              <RefreshCw className="h-3 w-3 text-muted-foreground" />
+                          <div 
+                            className="h-10 w-10 rounded-lg flex items-center justify-center text-lg"
+                            style={{ backgroundColor: `${CATEGORY_CONFIG[expense.category].color}20` }}
+                          >
+                            {CATEGORY_CONFIG[expense.category].icon}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">
+                                {CATEGORY_CONFIG[expense.category].label}
+                              </span>
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs px-1.5 py-0"
+                                style={{ 
+                                  borderColor: OWNER_CONFIG[expense.owner].color,
+                                  color: OWNER_CONFIG[expense.owner].color
+                                }}
+                              >
+                                {OWNER_CONFIG[expense.owner].icon} {OWNER_CONFIG[expense.owner].label}
+                              </Badge>
+                              {expense.isRecurring && (
+                                <RefreshCw className="h-3 w-3 text-muted-foreground" />
+                              )}
+                            </div>
+                            {expense.description && (
+                              <p className="text-sm text-muted-foreground truncate">
+                                {expense.description}
+                              </p>
                             )}
                           </div>
-                          {expense.description && (
-                            <p className="text-sm text-muted-foreground truncate">
-                              {expense.description}
-                            </p>
-                          )}
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">
+                              {formatCurrency(expense.amount)}
+                            </span>
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => deleteExpense(expense.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold">
-                            {formatCurrency(expense.amount)}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => deleteExpense(expense.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
