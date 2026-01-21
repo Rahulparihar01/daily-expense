@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Wallet, Mail, Lock, Loader2, User, ArrowLeft } from 'lucide-react';
+import { Wallet, Mail, Lock, Loader2, User, ArrowLeft, Users } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { OWNER_CONFIG, ExpenseOwner } from '@/types/expense';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +25,7 @@ const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['husband', 'wife'], { required_error: 'Please select your role' }),
 });
 
 const forgotPasswordSchema = z.object({
@@ -68,6 +71,7 @@ export default function Auth() {
       name: '',
       email: '',
       password: '',
+      role: undefined,
     },
   });
 
@@ -120,7 +124,7 @@ export default function Auth() {
   const handleSignup = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      const { error } = await signUp(data.email, data.password, data.name);
+      const { error } = await signUp(data.email, data.password, data.name, data.role as ExpenseOwner);
       if (error) {
         if (error.message.includes('already registered')) {
           toast({
@@ -632,6 +636,40 @@ export default function Auth() {
                           {...field}
                         />
                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={signupForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      I am the
+                    </FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="husband" id="husband" />
+                          <label htmlFor="husband" className="text-sm font-medium cursor-pointer flex items-center gap-1">
+                            {OWNER_CONFIG.husband.icon} {OWNER_CONFIG.husband.label}
+                          </label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="wife" id="wife" />
+                          <label htmlFor="wife" className="text-sm font-medium cursor-pointer flex items-center gap-1">
+                            {OWNER_CONFIG.wife.icon} {OWNER_CONFIG.wife.label}
+                          </label>
+                        </div>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
