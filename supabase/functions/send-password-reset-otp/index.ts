@@ -59,10 +59,42 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (!userExists) {
       console.log("User not found:", email);
+      // Return generic message to prevent email enumeration
       return new Response(
-        JSON.stringify({ error: "No account found with this email address" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
+    }
+
+    // Rate limiting: Check for recent OTP requests (max 3 per hour)
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: recentOTPs, error: recentError } = await supabaseAdmin
+      .from("password_reset_otps")
+      .select("created_at")
+      .eq("email", email.toLowerCase())
+      .gte("created_at", oneHourAgo);
+
+    if (recentError) {
+      console.error("Error checking recent OTPs:", recentError);
+    }
+
+    if (recentOTPs && recentOTPs.length >= 3) {
+      console.log("Rate limit exceeded for:", email);
+      return new Response(
+        JSON.stringify({ error: "Too many reset requests. Please try again later." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Invalidate any existing unused OTPs for this email
+    const { error: invalidateError } = await supabaseAdmin
+      .from("password_reset_otps")
+      .update({ used: true })
+      .eq("email", email.toLowerCase())
+      .eq("used", false);
+
+    if (invalidateError) {
+      console.error("Error invalidating old OTPs:", invalidateError);
     }
 
     // Generate OTP
@@ -76,7 +108,8 @@ const handler = async (req: Request): Promise<Response> => {
         email: email.toLowerCase(),
         otp_code: otp,
         expires_at: expiresAt.toISOString(),
-        used: false
+        used: false,
+        attempts: 0
       });
 
     if (insertError) {
@@ -147,14 +180,13 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Email sent successfully:", emailResponse);
 
     return new Response(
-      JSON.stringify({ success: true, message: "OTP sent successfully" }),
+      JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {
     console.error("Error in send-password-reset-otp:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An error occurred. Please try again." }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }

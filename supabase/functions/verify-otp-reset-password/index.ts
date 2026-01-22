@@ -13,6 +13,8 @@ interface VerifyOTPRequest {
   action: "verify" | "reset";
 }
 
+const MAX_ATTEMPTS = 5;
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -29,6 +31,14 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Validate OTP format (must be 6 digits)
+    if (!/^\d{6}$/.test(otp)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid OTP format" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     console.log(`Processing ${action} request for:`, email);
 
     // Create Supabase admin client
@@ -38,12 +48,11 @@ const handler = async (req: Request): Promise<Response> => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Fetch the OTP record
+    // Fetch the OTP record (get most recent unused OTP for this email)
     const { data: otpRecords, error: fetchError } = await supabaseAdmin
       .from("password_reset_otps")
       .select("*")
       .eq("email", email.toLowerCase())
-      .eq("otp_code", otp)
       .eq("used", false)
       .order("created_at", { ascending: false })
       .limit(1);
@@ -57,20 +66,63 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!otpRecords || otpRecords.length === 0) {
-      console.log("Invalid OTP for:", email);
+      console.log("No valid OTP found for:", email);
       return new Response(
-        JSON.stringify({ error: "Invalid OTP. Please check and try again." }),
+        JSON.stringify({ error: "Invalid or expired OTP. Please request a new one." }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
     const otpRecord = otpRecords[0];
 
+    // Check if too many failed attempts
+    const attempts = otpRecord.attempts || 0;
+    if (attempts >= MAX_ATTEMPTS) {
+      console.log("Too many failed attempts for:", email);
+      // Mark as used to prevent further attempts
+      await supabaseAdmin
+        .from("password_reset_otps")
+        .update({ used: true })
+        .eq("id", otpRecord.id);
+      
+      return new Response(
+        JSON.stringify({ error: "Too many failed attempts. Please request a new code." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     // Check if OTP is expired
     if (new Date(otpRecord.expires_at) < new Date()) {
       console.log("OTP expired for:", email);
+      // Mark as used since it's expired
+      await supabaseAdmin
+        .from("password_reset_otps")
+        .update({ used: true })
+        .eq("id", otpRecord.id);
+      
       return new Response(
         JSON.stringify({ error: "This code has expired. Please request a new one." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate OTP code (timing-safe comparison would be ideal but not critical for 6-digit codes)
+    if (otpRecord.otp_code !== otp) {
+      console.log("Invalid OTP code for:", email);
+      
+      // Increment attempts counter
+      await supabaseAdmin
+        .from("password_reset_otps")
+        .update({ attempts: attempts + 1 })
+        .eq("id", otpRecord.id);
+      
+      const remainingAttempts = MAX_ATTEMPTS - attempts - 1;
+      return new Response(
+        JSON.stringify({ 
+          error: remainingAttempts > 0 
+            ? `Invalid OTP. ${remainingAttempts} attempt(s) remaining.`
+            : "Invalid OTP. Please request a new code."
+        }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
@@ -148,9 +200,8 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: unknown) {
     console.error("Error in verify-otp-reset-password:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: "An error occurred. Please try again." }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
