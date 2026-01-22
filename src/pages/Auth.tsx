@@ -3,13 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Wallet, Mail, Lock, Loader2, User, ArrowLeft, Users } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { OWNER_CONFIG, ExpenseOwner } from '@/types/expense';
+import { Wallet, Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useToast } from '@/hooks/use-toast';
@@ -19,13 +16,6 @@ import { supabase } from '@/integrations/supabase/client';
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const signupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['husband', 'wife'], { required_error: 'Please select your role' }),
 });
 
 const forgotPasswordSchema = z.object({
@@ -41,19 +31,17 @@ const newPasswordSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
-type SignupFormData = z.infer<typeof signupSchema>;
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 type NewPasswordFormData = z.infer<typeof newPasswordSchema>;
 
-type AuthView = 'login' | 'signup' | 'forgot-password' | 'verify-otp' | 'reset-password';
+type AuthView = 'login' | 'forgot-password' | 'verify-otp' | 'reset-password';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [authView, setAuthView] = useState<AuthView>('login');
   const [resetEmail, setResetEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -62,16 +50,6 @@ export default function Auth() {
     defaultValues: {
       email: '',
       password: '',
-    },
-  });
-
-  const signupForm = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      role: undefined,
     },
   });
 
@@ -113,36 +91,6 @@ export default function Auth() {
         toast({
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
-        });
-        navigate('/');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async (data: SignupFormData) => {
-    setIsLoading(true);
-    try {
-      const { error } = await signUp(data.email, data.password, data.name, data.role as ExpenseOwner);
-      if (error) {
-        if (error.message.includes('already registered')) {
-          toast({
-            title: 'Account exists',
-            description: 'This email is already registered. Try logging in instead.',
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Signup failed',
-            description: error.message,
-            variant: 'destructive',
-          });
-        }
-      } else {
-        toast({
-          title: 'Account created!',
-          description: 'You can now start tracking your expenses.',
         });
         navigate('/');
       }
@@ -267,7 +215,6 @@ export default function Auth() {
       forgotPasswordForm.reset();
       newPasswordForm.reset();
       setAuthView('login');
-      setActiveTab('login');
     } finally {
       setIsLoading(false);
     }
@@ -481,216 +428,89 @@ export default function Auth() {
     </div>
   );
 
+  const renderLoginView = () => (
+    <Form {...loginForm}>
+      <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+        <FormField
+          control={loginForm.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    className="pl-10"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={loginForm.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="text-right">
+          <Button
+            type="button"
+            variant="link"
+            className="p-0 h-auto text-sm"
+            onClick={() => setAuthView('forgot-password')}
+          >
+            Forgot password?
+          </Button>
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            'Login'
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+
   const renderAuthContent = () => {
-    if (authView === 'forgot-password') {
-      return renderForgotPasswordView();
+    switch (authView) {
+      case 'forgot-password':
+        return renderForgotPasswordView();
+      case 'verify-otp':
+        return renderVerifyOTPView();
+      case 'reset-password':
+        return renderResetPasswordView();
+      default:
+        return renderLoginView();
     }
-
-    if (authView === 'verify-otp') {
-      return renderVerifyOTPView();
-    }
-
-    if (authView === 'reset-password') {
-      return renderResetPasswordView();
-    }
-
-    return (
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'login' | 'signup')}>
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="signup">Sign Up</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="login">
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="email"
-                          placeholder="you@example.com"
-                          className="pl-10"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          className="pl-10"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="text-right">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="p-0 h-auto text-sm"
-                  onClick={() => setAuthView('forgot-password')}
-                >
-                  Forgot password?
-                </Button>
-              </div>
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  'Login'
-                )}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-        
-        <TabsContent value="signup">
-          <Form {...signupForm}>
-            <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-              <FormField
-                control={signupForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="text"
-                          placeholder="Your name"
-                          className="pl-10"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={signupForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="email"
-                          placeholder="you@example.com"
-                          className="pl-10"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={signupForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          className="pl-10"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={signupForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      I am the
-                    </FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="husband" id="husband" />
-                          <label htmlFor="husband" className="text-sm font-medium cursor-pointer flex items-center gap-1">
-                            {OWNER_CONFIG.husband.icon} {OWNER_CONFIG.husband.label}
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="wife" id="wife" />
-                          <label htmlFor="wife" className="text-sm font-medium cursor-pointer flex items-center gap-1">
-                            {OWNER_CONFIG.wife.icon} {OWNER_CONFIG.wife.label}
-                          </label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  'Create Account'
-                )}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-      </Tabs>
-    );
   };
 
   return (
@@ -702,7 +522,7 @@ export default function Auth() {
           </div>
           <CardTitle className="text-2xl font-bold">Expense Tracker</CardTitle>
           <CardDescription>
-            Manage your family expenses together
+            Login to manage your expenses
           </CardDescription>
         </CardHeader>
         <CardContent>
