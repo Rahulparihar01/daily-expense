@@ -18,6 +18,16 @@ function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// Mask email for logging to protect PII
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***';
+  const maskedLocal = local.length > 2 
+    ? local[0] + '***' + local[local.length - 1]
+    : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -28,14 +38,15 @@ const handler = async (req: Request): Promise<Response> => {
     const { email }: SendOTPRequest = await req.json();
     
     if (!email || !email.includes('@')) {
-      console.log("Invalid email provided:", email);
+      console.log("Invalid email format provided");
       return new Response(
         JSON.stringify({ error: "Please provide a valid email address" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    console.log("Processing password reset request for:", email);
+    const maskedEmail = maskEmail(email);
+    console.log("Processing password reset request for:", maskedEmail);
 
     // Create Supabase admin client to check if user exists
     const supabaseAdmin = createClient(
@@ -48,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: users, error: userError } = await supabaseAdmin.auth.admin.listUsers();
     
     if (userError) {
-      console.error("Error checking user:", userError);
+      console.error("Error checking user existence");
       return new Response(
         JSON.stringify({ error: "An error occurred. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -58,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
     const userExists = users.users.some(u => u.email?.toLowerCase() === email.toLowerCase());
     
     if (!userExists) {
-      console.log("User not found:", email);
+      console.log("User lookup completed for:", maskedEmail);
       // Return generic message to prevent email enumeration
       return new Response(
         JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),
@@ -75,11 +86,11 @@ const handler = async (req: Request): Promise<Response> => {
       .gte("created_at", oneHourAgo);
 
     if (recentError) {
-      console.error("Error checking recent OTPs:", recentError);
+      console.error("Error checking recent OTPs");
     }
 
     if (recentOTPs && recentOTPs.length >= 3) {
-      console.log("Rate limit exceeded for:", email);
+      console.log("Rate limit exceeded for:", maskedEmail);
       return new Response(
         JSON.stringify({ error: "Too many reset requests. Please try again later." }),
         { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -94,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("used", false);
 
     if (invalidateError) {
-      console.error("Error invalidating old OTPs:", invalidateError);
+      console.error("Error invalidating old OTPs");
     }
 
     // Generate OTP
@@ -113,14 +124,14 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     if (insertError) {
-      console.error("Error storing OTP:", insertError);
+      console.error("Error storing OTP");
       return new Response(
         JSON.stringify({ error: "Failed to generate reset code. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    console.log("OTP generated and stored successfully for:", email);
+    console.log("OTP generated and stored successfully for:", maskedEmail);
 
     // Send OTP via email
     const emailResponse = await resend.emails.send({
@@ -177,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully for:", maskedEmail);
 
     return new Response(
       JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),

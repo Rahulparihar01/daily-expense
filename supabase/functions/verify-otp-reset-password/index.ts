@@ -15,6 +15,36 @@ interface VerifyOTPRequest {
 
 const MAX_ATTEMPTS = 5;
 
+// Mask email for logging to protect PII
+function maskEmail(email: string): string {
+  const [local, domain] = email.split('@');
+  if (!domain) return '***';
+  const maskedLocal = local.length > 2 
+    ? local[0] + '***' + local[local.length - 1]
+    : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
+// Validate password strength
+function validatePassword(password: string): { valid: boolean; error?: string } {
+  if (password.length < 8) {
+    return { valid: false, error: 'Password must be at least 8 characters' };
+  }
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one lowercase letter' };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one uppercase letter' };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one number' };
+  }
+  if (!/[^a-zA-Z0-9]/.test(password)) {
+    return { valid: false, error: 'Password must contain at least one special character' };
+  }
+  return { valid: true };
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -39,7 +69,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Processing ${action} request for:`, email);
+    const maskedEmail = maskEmail(email);
+    console.log(`Processing ${action} request for:`, maskedEmail);
 
     // Create Supabase admin client
     const supabaseAdmin = createClient(
@@ -58,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       .limit(1);
 
     if (fetchError) {
-      console.error("Error fetching OTP:", fetchError);
+      console.error("Error fetching OTP");
       return new Response(
         JSON.stringify({ error: "An error occurred. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -66,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!otpRecords || otpRecords.length === 0) {
-      console.log("No valid OTP found for:", email);
+      console.log("No valid OTP found for:", maskedEmail);
       return new Response(
         JSON.stringify({ error: "Invalid or expired OTP. Please request a new one." }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -78,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Check if too many failed attempts
     const attempts = otpRecord.attempts || 0;
     if (attempts >= MAX_ATTEMPTS) {
-      console.log("Too many failed attempts for:", email);
+      console.log("Too many failed attempts for:", maskedEmail);
       // Mark as used to prevent further attempts
       await supabaseAdmin
         .from("password_reset_otps")
@@ -93,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if OTP is expired
     if (new Date(otpRecord.expires_at) < new Date()) {
-      console.log("OTP expired for:", email);
+      console.log("OTP expired for:", maskedEmail);
       // Mark as used since it's expired
       await supabaseAdmin
         .from("password_reset_otps")
@@ -108,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate OTP code (timing-safe comparison would be ideal but not critical for 6-digit codes)
     if (otpRecord.otp_code !== otp) {
-      console.log("Invalid OTP code for:", email);
+      console.log("Invalid OTP code attempt for:", maskedEmail);
       
       // Increment attempts counter
       await supabaseAdmin
@@ -129,7 +160,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // If just verifying, return success
     if (action === "verify") {
-      console.log("OTP verified successfully for:", email);
+      console.log("OTP verified successfully for:", maskedEmail);
       return new Response(
         JSON.stringify({ success: true, message: "OTP verified successfully" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -138,9 +169,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     // For password reset, we need the new password
     if (action === "reset") {
-      if (!newPassword || newPassword.length < 6) {
+      if (!newPassword) {
         return new Response(
-          JSON.stringify({ error: "Password must be at least 6 characters" }),
+          JSON.stringify({ error: "Password is required" }),
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      // Validate password strength
+      const validation = validatePassword(newPassword);
+      if (!validation.valid) {
+        return new Response(
+          JSON.stringify({ error: validation.error }),
           { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       }
@@ -149,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { data: users, error: userError } = await supabaseAdmin.auth.admin.listUsers();
       
       if (userError) {
-        console.error("Error finding user:", userError);
+        console.error("Error finding user");
         return new Response(
           JSON.stringify({ error: "An error occurred. Please try again." }),
           { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -159,7 +199,7 @@ const handler = async (req: Request): Promise<Response> => {
       const user = users.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
       
       if (!user) {
-        console.log("User not found:", email);
+        console.log("User not found for password reset:", maskedEmail);
         return new Response(
           JSON.stringify({ error: "User not found" }),
           { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -173,7 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       if (updateError) {
-        console.error("Error updating password:", updateError);
+        console.error("Error updating password");
         return new Response(
           JSON.stringify({ error: "Failed to update password. Please try again." }),
           { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -186,7 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
         .update({ used: true })
         .eq("id", otpRecord.id);
 
-      console.log("Password reset successfully for:", email);
+      console.log("Password reset successfully for:", maskedEmail);
 
       return new Response(
         JSON.stringify({ success: true, message: "Password updated successfully" }),
