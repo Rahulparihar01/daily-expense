@@ -80,45 +80,48 @@ function PieChartView({ data, activeIndex, onPieEnter, onPieLeave, onCategoryCli
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={2}
-          dataKey="value"
-          nameKey="name"
-          activeIndex={activeIndex}
-          activeShape={renderActiveShape}
-          onMouseEnter={onPieEnter}
-          onMouseLeave={onPieLeave}
-          onClick={(_, index) => onCategoryClick(data[index].category)}
-          style={{ cursor: 'pointer' }}
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
-          ))}
-        </Pie>
-        <Tooltip 
-          formatter={(value: number) => formatCurrency(value)}
-          contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          }}
-        />
-        <Legend 
-          layout="horizontal"
-          verticalAlign="bottom"
-          align="center"
-          wrapperStyle={{ paddingTop: '20px' }}
-        />
-      </PieChart>
-    </ResponsiveContainer>
+    <div key={data.map(d => d.category).join('-')}>
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={100}
+            paddingAngle={2}
+            dataKey="value"
+            nameKey="name"
+            activeIndex={activeIndex}
+            activeShape={renderActiveShape}
+            onMouseEnter={onPieEnter}
+            onMouseLeave={onPieLeave}
+            onClick={(_, index) => onCategoryClick(data[index].category)}
+            style={{ cursor: 'pointer' }}
+            isAnimationActive={false}
+          >
+            {data.map((entry) => (
+              <Cell key={`cell-${entry.category}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value: number) => formatCurrency(value)}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            }}
+          />
+          <Legend 
+            layout="horizontal"
+            verticalAlign="bottom"
+            align="center"
+            wrapperStyle={{ paddingTop: '20px' }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -127,7 +130,10 @@ export function CategoryPieChart() {
   const [selectedOwners, setSelectedOwners] = useState<ExpenseOwner[]>(['husband', 'wife']);
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  const filteredExpenses = expenses.filter(e => selectedOwners.includes(e.owner as ExpenseOwner));
+  const filteredExpenses = expenses.filter(e => {
+    const ownerLower = e.owner.toLowerCase() as ExpenseOwner;
+    return selectedOwners.includes(ownerLower);
+  });
   const chartData = getOwnerChartData(filteredExpenses);
 
   const handlePieEnter = (_: any, index: number) => {
