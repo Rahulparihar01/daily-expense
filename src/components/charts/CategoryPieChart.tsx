@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useExpenses } from '@/context/ExpenseContext';
 import { formatCurrency } from '@/lib/expense-utils';
 import { CATEGORY_CONFIG, OWNER_CONFIG, ExpenseCategory, ExpenseOwner } from '@/types/expense';
@@ -124,15 +124,11 @@ function PieChartView({ data, activeIndex, onPieEnter, onPieLeave, onCategoryCli
 
 export function CategoryPieChart() {
   const { expenses, filters, setFilters } = useExpenses();
-  const [activeTab, setActiveTab] = useState<'all' | ExpenseOwner>('all');
+  const [selectedOwners, setSelectedOwners] = useState<ExpenseOwner[]>(['husband', 'wife']);
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
 
-  const husbandExpenses = expenses.filter(e => e.owner === 'husband');
-  const wifeExpenses = expenses.filter(e => e.owner === 'wife');
-
-  const allData = getOwnerChartData(expenses);
-  const husbandData = getOwnerChartData(husbandExpenses);
-  const wifeData = getOwnerChartData(wifeExpenses);
+  const filteredExpenses = expenses.filter(e => selectedOwners.includes(e.owner as ExpenseOwner));
+  const chartData = getOwnerChartData(filteredExpenses);
 
   const handlePieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -143,7 +139,6 @@ export function CategoryPieChart() {
   };
 
   const handleCategoryClick = (category: ExpenseCategory) => {
-    // Toggle category filter
     const currentCategories = filters.categories;
     const newCategories = currentCategories.includes(category)
       ? currentCategories.filter(c => c !== category)
@@ -155,64 +150,49 @@ export function CategoryPieChart() {
     });
   };
 
-  const getCurrentData = () => {
-    switch (activeTab) {
-      case 'husband':
-        return husbandData;
-      case 'wife':
-        return wifeData;
-      default:
-        return allData;
-    }
+  const toggleOwner = (owner: ExpenseOwner) => {
+    setSelectedOwners(prev => 
+      prev.includes(owner)
+        ? prev.filter(o => o !== owner)
+        : [...prev, owner]
+    );
   };
 
   return (
     <Card className="shadow-soft">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Category Distribution</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Category Distribution</CardTitle>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={selectedOwners.includes('husband')}
+                onCheckedChange={() => toggleOwner('husband')}
+              />
+              <span className="flex items-center gap-1 text-sm">
+                {OWNER_CONFIG.husband.icon} {OWNER_CONFIG.husband.label}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={selectedOwners.includes('wife')}
+                onCheckedChange={() => toggleOwner('wife')}
+              />
+              <span className="flex items-center gap-1 text-sm">
+                {OWNER_CONFIG.wife.icon} {OWNER_CONFIG.wife.label}
+              </span>
+            </label>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'all' | ExpenseOwner)}>
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="husband" className="flex items-center gap-1">
-              {OWNER_CONFIG.husband.icon} {OWNER_CONFIG.husband.label}
-            </TabsTrigger>
-            <TabsTrigger value="wife" className="flex items-center gap-1">
-              {OWNER_CONFIG.wife.icon} {OWNER_CONFIG.wife.label}
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="all" className="mt-0">
-            <PieChartView 
-              data={allData}
-              activeIndex={activeIndex}
-              onPieEnter={handlePieEnter}
-              onPieLeave={handlePieLeave}
-              onCategoryClick={handleCategoryClick}
-            />
-          </TabsContent>
-          
-          <TabsContent value="husband" className="mt-0">
-            <PieChartView 
-              data={husbandData}
-              activeIndex={activeIndex}
-              onPieEnter={handlePieEnter}
-              onPieLeave={handlePieLeave}
-              onCategoryClick={handleCategoryClick}
-            />
-          </TabsContent>
-          
-          <TabsContent value="wife" className="mt-0">
-            <PieChartView 
-              data={wifeData}
-              activeIndex={activeIndex}
-              onPieEnter={handlePieEnter}
-              onPieLeave={handlePieLeave}
-              onCategoryClick={handleCategoryClick}
-            />
-          </TabsContent>
-        </Tabs>
+        <PieChartView 
+          data={chartData}
+          activeIndex={activeIndex}
+          onPieEnter={handlePieEnter}
+          onPieLeave={handlePieLeave}
+          onCategoryClick={handleCategoryClick}
+        />
         
         {filters.categories.length > 0 && (
           <div className="mt-4 pt-4 border-t">
