@@ -164,25 +164,6 @@ export function ExpenseFilters() {
             </Popover>
           )}
 
-          <div className="h-6 w-px bg-border" />
-
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-2">
-            {ALL_CATEGORIES.map(category => (
-              <Badge
-                key={category}
-                variant={filters.categories.includes(category) ? 'default' : 'outline'}
-                className={cn(
-                  'cursor-pointer transition-all',
-                  filters.categories.includes(category) && 'bg-primary hover:bg-primary/90'
-                )}
-                onClick={() => toggleCategory(category)}
-              >
-                {CATEGORY_CONFIG[category].icon} {CATEGORY_CONFIG[category].label}
-              </Badge>
-            ))}
-          </div>
-
           {/* Clear Filters */}
           {hasActiveFilters && (
             <Button
