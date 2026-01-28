@@ -146,7 +146,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
                   <FormItem>
                     <FormLabel>Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" max={getTodayString()} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
