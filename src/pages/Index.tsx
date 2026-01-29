@@ -9,6 +9,7 @@ import { BudgetManager } from '@/components/budget/BudgetManager';
 import { RecurringManager } from '@/components/recurring/RecurringManager';
 import { DataManager } from '@/components/data/DataManager';
 import { ExpenseHistory } from '@/components/history/ExpenseHistory';
+import { ExpenseChatbot } from '@/components/chat/ExpenseChatbot';
 import { useExpenses } from '@/context/ExpenseContext';
 import { Loader2 } from 'lucide-react';
 
@@ -80,9 +81,12 @@ const Index = () => {
   };
 
   return (
-    <DashboardLayout activeSection={activeSection} onSectionChange={setActiveSection}>
-      {renderContent()}
-    </DashboardLayout>
+    <>
+      <DashboardLayout activeSection={activeSection} onSectionChange={setActiveSection}>
+        {renderContent()}
+      </DashboardLayout>
+      <ExpenseChatbot />
+    </>
   );
 };
 
