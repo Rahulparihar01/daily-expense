@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useExpenses } from '@/context/ExpenseContext';
 import { formatCurrency, calculateTotalExpense } from '@/lib/expense-utils';
@@ -61,21 +61,29 @@ export function OwnerComparisonChart() {
       <CardContent>
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ left: 20, right: 20 }}>
+            <BarChart data={data} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
-                type="number" 
-                tickFormatter={(value) => formatCurrency(value)}
-                className="text-xs"
-              />
-              <YAxis 
                 type="category" 
                 dataKey="name" 
-                width={80}
                 className="text-xs"
+                tick={{ fill: 'hsl(var(--foreground))' }}
+              />
+              <YAxis 
+                type="number"
+                tickFormatter={(value) => formatCurrency(value)}
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="amount" radius={[0, 4, 4, 0]} maxBarSize={50}>
+              <Bar dataKey="amount" radius={[4, 4, 0, 0]} maxBarSize={80}>
+                <LabelList 
+                  dataKey="amount" 
+                  position="top" 
+                  formatter={(value: number) => formatCurrency(value)}
+                  className="text-xs font-medium"
+                  fill="hsl(var(--foreground))"
+                />
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
