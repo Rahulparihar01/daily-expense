@@ -1,6 +1,8 @@
 import { OwnerComparisonChart } from '@/components/charts/OwnerComparisonChart';
 import { OwnerExpenseList } from './OwnerExpenseList';
 import { MonthlyTrend } from './MonthlyTrend';
+import { OwnerLimitManager } from './OwnerLimitManager';
+import { LimitAlerts } from './LimitAlerts';
 import { useExpenses } from '@/context/ExpenseContext';
 import { formatCurrency, calculateTotalExpense } from '@/lib/expense-utils';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,6 +29,9 @@ export function MonthlyOverview() {
           Compare expenses between household members for {formatMonth(currentMonth)}
         </p>
       </div>
+
+      {/* Limit Alerts */}
+      <LimitAlerts />
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -91,10 +96,11 @@ export function MonthlyOverview() {
         <MonthlyTrend />
       </div>
 
-      {/* Owner Expense Lists */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* Owner Expense Lists and Limit Manager */}
+      <div className="grid gap-6 lg:grid-cols-3">
         <OwnerExpenseList owner="husband" />
         <OwnerExpenseList owner="wife" />
+        <OwnerLimitManager />
       </div>
     </div>
   );
