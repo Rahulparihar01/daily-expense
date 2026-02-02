@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, LogOut, Wallet, History } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, LogOut, Wallet, History, CalendarRange } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const menuItems = [
   { title: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
+  { title: 'Monthly', icon: CalendarRange, id: 'monthly' },
   { title: 'History', icon: History, id: 'history' },
 ];
 
