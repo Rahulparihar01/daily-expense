@@ -30,9 +30,18 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useExpenses } from '@/context/ExpenseContext';
-import { ALL_CATEGORIES, CATEGORY_CONFIG, ALL_OWNERS, OWNER_CONFIG, ExpenseOwner } from '@/types/expense';
+import { useAuth } from '@/context/AuthContext';
+import { ALL_CATEGORIES, CATEGORY_CONFIG, ALL_OWNERS, OWNER_CONFIG, ExpenseOwner, ExpenseCategory } from '@/types/expense';
 import { getTodayString } from '@/lib/expense-utils';
+import { getMonthKey } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  createNotification, 
+  formatExpenseAddedNotification,
+  formatLimitWarningNotification,
+  formatLimitReachedNotification
+} from '@/lib/notification-service';
+import { useOwnerLimits } from '@/hooks/useOwnerLimits';
 
 const expenseSchema = z.object({
   date: z.string().min(1, 'Date is required'),
@@ -52,8 +61,10 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ trigger }: ExpenseFormProps) {
   const [open, setOpen] = useState(false);
-  const { addExpense, addRecurringTemplate } = useExpenses();
+  const { addExpense, addRecurringTemplate, expenses, currentMonth } = useExpenses();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const { limits } = useOwnerLimits(currentMonth);
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
@@ -70,7 +81,37 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
 
   const isRecurring = form.watch('isRecurring');
 
-  function onSubmit(data: ExpenseFormData) {
+  async function checkAndNotifyLimits(owner: ExpenseOwner, newAmount: number) {
+    if (!user) return;
+
+    const ownerLimit = limits.find(l => l.owner === owner);
+    if (!ownerLimit) return;
+
+    // Calculate current spending for this owner
+    const expenseMonth = getMonthKey(new Date());
+    const currentSpending = expenses
+      .filter(e => e.owner === owner && getMonthKey(e.date) === expenseMonth)
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const newTotal = currentSpending + newAmount;
+    const percentage = (newTotal / ownerLimit.limitAmount) * 100;
+    const previousPercentage = (currentSpending / ownerLimit.limitAmount) * 100;
+
+    // Check if crossing 100% threshold
+    if (percentage >= 100 && previousPercentage < 100) {
+      await createNotification(
+        formatLimitReachedNotification(user.id, owner, newTotal, ownerLimit.limitAmount)
+      );
+    } 
+    // Check if crossing 80% threshold
+    else if (percentage >= 80 && previousPercentage < 80) {
+      await createNotification(
+        formatLimitWarningNotification(user.id, owner, newTotal, ownerLimit.limitAmount)
+      );
+    }
+  }
+
+  async function onSubmit(data: ExpenseFormData) {
     if (data.isRecurring && data.recurringFrequency) {
       // Create recurring template
       addRecurringTemplate({
@@ -98,6 +139,22 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
         isRecurring: false,
         recurringFrequency: null,
       });
+
+      // Create notification for expense added
+      if (user) {
+        await createNotification(
+          formatExpenseAddedNotification(
+            user.id, 
+            data.amount, 
+            data.category as ExpenseCategory, 
+            data.owner, 
+            data.description
+          )
+        );
+        
+        // Check and notify about limits
+        await checkAndNotifyLimits(data.owner, data.amount);
+      }
       
       toast({
         title: 'Expense added',
