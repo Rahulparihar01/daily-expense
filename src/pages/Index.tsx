@@ -11,6 +11,7 @@ import { DataManager } from '@/components/data/DataManager';
 import { ExpenseHistory } from '@/components/history/ExpenseHistory';
 import { ExpenseChatbot } from '@/components/chat/ExpenseChatbot';
 import { MonthlyOverview } from '@/components/monthly/MonthlyOverview';
+import { NotificationsView } from '@/components/notifications/NotificationsView';
 import { useExpenses } from '@/context/ExpenseContext';
 import { Loader2 } from 'lucide-react';
 
@@ -90,6 +91,8 @@ const Index = () => {
     switch (activeSection) {
       case 'monthly':
         return <MonthlyContent />;
+      case 'notifications':
+        return <NotificationsView />;
       case 'history':
         return <HistoryContent />;
       default:

@@ -83,6 +83,36 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_limits: {
+        Row: {
+          created_at: string
+          id: string
+          limit_amount: number
+          month: string
+          owner: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          limit_amount: number
+          month: string
+          owner: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          limit_amount?: number
+          month?: string
+          owner?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       password_reset_otps: {
         Row: {
           attempts: number
