@@ -145,6 +145,7 @@ export function generateRecurringExpenses(
           amount: template.amount,
           description: template.description,
           owner: template.owner,
+          paymentMethod: 'cash',
           isRecurring: true,
           recurringFrequency: template.frequency,
           recurringTemplateId: template.id,

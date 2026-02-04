@@ -39,6 +39,7 @@ export function useExpenseDatabase(currentMonth: string) {
       owner: e.owner as ExpenseOwner,
       amount: parseFloat(e.amount.toString()),
       description: e.description || undefined,
+      paymentMethod: (e as any).payment_method || 'cash',
       isRecurring: e.is_recurring,
       recurringFrequency: e.recurring_frequency as Expense['recurringFrequency'],
       recurringTemplateId: e.recurring_template_id || undefined,
@@ -121,10 +122,11 @@ export function useExpenseDatabase(currentMonth: string) {
       owner: expenseData.owner,
       amount: expenseData.amount,
       description: expenseData.description || null,
+      payment_method: expenseData.paymentMethod || 'cash',
       is_recurring: expenseData.isRecurring,
       recurring_frequency: expenseData.recurringFrequency,
       recurring_template_id: expenseData.recurringTemplateId || null,
-    });
+    } as any);
 
     if (error) {
       toast({ title: 'Error adding expense', description: error.message, variant: 'destructive' });

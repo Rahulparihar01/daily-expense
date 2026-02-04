@@ -3,13 +3,14 @@ import { format, parseISO, isValid } from 'date-fns';
 
 // CSV Export
 export function exportExpensesToCSV(expenses: Expense[]): string {
-  const headers = ['Date', 'Category', 'Owner', 'Amount', 'Description', 'Is Recurring', 'Recurring Frequency'];
+  const headers = ['Date', 'Category', 'Owner', 'Amount', 'Payment Method', 'Description', 'Is Recurring', 'Recurring Frequency'];
   
   const rows = expenses.map(expense => [
     expense.date,
     CATEGORY_CONFIG[expense.category]?.label || expense.category,
     OWNER_CONFIG[expense.owner]?.label || expense.owner,
     expense.amount.toString(),
+    expense.paymentMethod || 'cash',
     expense.description || '',
     expense.isRecurring ? 'Yes' : 'No',
     expense.recurringFrequency || '',
@@ -186,6 +187,7 @@ export function parseCSVToExpenses(csvContent: string): ImportResult {
       owner,
       amount,
       description: description || undefined,
+      paymentMethod: 'cash',
       isRecurring,
       recurringFrequency,
     });

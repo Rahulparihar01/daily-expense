@@ -31,7 +31,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useExpenses } from '@/context/ExpenseContext';
 import { useAuth } from '@/context/AuthContext';
-import { ALL_CATEGORIES, CATEGORY_CONFIG, ALL_OWNERS, OWNER_CONFIG, ExpenseOwner, ExpenseCategory } from '@/types/expense';
+import { ALL_CATEGORIES, CATEGORY_CONFIG, ALL_OWNERS, OWNER_CONFIG, ExpenseOwner, ExpenseCategory, ALL_PAYMENT_METHODS, PAYMENT_METHOD_CONFIG, PaymentMethod } from '@/types/expense';
 import { getTodayString } from '@/lib/expense-utils';
 import { getMonthKey } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
@@ -47,6 +47,7 @@ const expenseSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   category: z.enum(['milk', 'food', 'transport', 'utilities', 'entertainment', 'healthcare', 'shopping', 'other']),
   owner: z.enum(['husband', 'wife']),
+  paymentMethod: z.enum(['cash', 'card', 'online']),
   amount: z.string().min(1, 'Amount is required').transform(val => parseFloat(val)),
   description: z.string().optional(),
   isRecurring: z.boolean().default(false),
@@ -72,6 +73,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
       date: getTodayString(),
       category: 'food',
       owner: 'husband',
+      paymentMethod: 'cash',
       amount: '' as any,
       description: '',
       isRecurring: false,
@@ -136,6 +138,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
         amount: data.amount,
         description: data.description,
         owner: data.owner,
+        paymentMethod: data.paymentMethod,
         isRecurring: false,
         recurringFrequency: null,
       });
@@ -166,6 +169,7 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
       date: getTodayString(),
       category: 'food',
       owner: 'husband',
+      paymentMethod: 'cash',
       amount: '' as any,
       description: '',
       isRecurring: false,
@@ -276,6 +280,34 @@ export function ExpenseForm({ trigger }: ExpenseFormProps) {
                           <span className="flex items-center gap-2">
                             <span>{CATEGORY_CONFIG[cat].icon}</span>
                             <span>{CATEGORY_CONFIG[cat].label}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment method" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ALL_PAYMENT_METHODS.map(method => (
+                        <SelectItem key={method} value={method}>
+                          <span className="flex items-center gap-2">
+                            <span>{PAYMENT_METHOD_CONFIG[method].icon}</span>
+                            <span>{PAYMENT_METHOD_CONFIG[method].label}</span>
                           </span>
                         </SelectItem>
                       ))}
