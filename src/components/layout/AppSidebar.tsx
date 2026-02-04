@@ -1,4 +1,4 @@
-import { LayoutDashboard, PlusCircle, LogOut, Wallet, History, CalendarRange, Bell } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, LogOut, Wallet, History, CalendarRange } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -16,13 +16,10 @@ import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
-import { Badge } from '@/components/ui/badge';
 
 const menuItems = [
   { title: 'Dashboard', icon: LayoutDashboard, id: 'dashboard' },
   { title: 'Monthly', icon: CalendarRange, id: 'monthly' },
-  { title: 'Notifications', icon: Bell, id: 'notifications' },
   { title: 'History', icon: History, id: 'history' },
 ];
 
@@ -34,7 +31,6 @@ interface AppSidebarProps {
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const { signOut, user } = useAuth();
-  const { unreadCount } = useNotifications();
   const isCollapsed = state === 'collapsed';
 
   return (
@@ -70,11 +66,6 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
-                  {item.id === 'notifications' && unreadCount > 0 && (
-                    <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1 text-xs">
-                      {unreadCount > 99 ? '99+' : unreadCount}
-                    </Badge>
-                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
