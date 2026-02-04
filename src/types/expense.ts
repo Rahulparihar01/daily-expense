@@ -10,6 +10,8 @@ export type ExpenseCategory =
 
 export type ExpenseOwner = 'husband' | 'wife';
 
+export type PaymentMethod = 'cash' | 'card' | 'online';
+
 export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | null;
 
 export interface Expense {
@@ -19,11 +21,20 @@ export interface Expense {
   amount: number;
   description?: string;
   owner: ExpenseOwner;
+  paymentMethod: PaymentMethod;
   isRecurring: boolean;
   recurringFrequency: RecurringFrequency;
   recurringTemplateId?: string;
   createdAt: string;
 }
+
+export const PAYMENT_METHOD_CONFIG: Record<PaymentMethod, { label: string; icon: string; color: string }> = {
+  cash: { label: 'Cash', icon: '💵', color: 'hsl(140, 60%, 45%)' },
+  card: { label: 'Card', icon: '💳', color: 'hsl(210, 70%, 50%)' },
+  online: { label: 'Online', icon: '📱', color: 'hsl(280, 60%, 55%)' },
+};
+
+export const ALL_PAYMENT_METHODS: PaymentMethod[] = ['cash', 'card', 'online'];
 
 export const OWNER_CONFIG: Record<ExpenseOwner, { label: string; icon: string; color: string }> = {
   husband: { label: 'Husband', icon: '👨', color: 'hsl(210, 70%, 50%)' },
