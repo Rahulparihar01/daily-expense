@@ -51,6 +51,7 @@ export type Database = {
           id: string
           is_recurring: boolean
           owner: string
+          payment_method: string
           recurring_frequency: string | null
           recurring_template_id: string | null
           user_id: string
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           owner: string
+          payment_method?: string
           recurring_frequency?: string | null
           recurring_template_id?: string | null
           user_id: string
@@ -77,8 +79,36 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           owner?: string
+          payment_method?: string
           recurring_frequency?: string | null
           recurring_template_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monthly_income: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          month: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          month: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          month?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
