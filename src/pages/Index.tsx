@@ -38,20 +38,20 @@ function DashboardContent() {
 
       <ExpenseFilters />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <CategoryPieChart />
         <DailyExpenseChart />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <PaymentMethodChart />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <ExpenseList />
         </div>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <IncomeManager />
           <BudgetManager />
           <RecurringManager />

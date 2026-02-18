@@ -71,25 +71,25 @@ export function ExpenseList() {
                     <div 
                       key={expense.id}
                       className={cn(
-                        'flex items-center gap-3 p-3 rounded-lg bg-secondary/30',
+                        'flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-secondary/30',
                         'transition-all duration-200 hover:bg-secondary/50 group'
                       )}
                     >
                       <div 
-                        className="h-10 w-10 rounded-lg flex items-center justify-center text-lg"
+                        className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg flex items-center justify-center text-sm sm:text-lg shrink-0"
                         style={{ backgroundColor: `${CATEGORY_CONFIG[expense.category].color}20` }}
                       >
                         {CATEGORY_CONFIG[expense.category].icon}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
+                        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                          <span className="font-medium text-sm sm:text-base">
                             {CATEGORY_CONFIG[expense.category].label}
                           </span>
                           <Badge 
                             variant="outline" 
-                            className="text-xs px-1.5 py-0"
+                            className="text-[10px] sm:text-xs px-1 sm:px-1.5 py-0"
                             style={{ 
                               borderColor: OWNER_CONFIG[expense.owner].color,
                               color: OWNER_CONFIG[expense.owner].color
@@ -102,24 +102,24 @@ export function ExpenseList() {
                           )}
                         </div>
                         {expense.description && (
-                          <p className="text-sm text-muted-foreground truncate">
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
                             {expense.description}
                           </p>
                         )}
                       </div>
                       
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">
+                      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                        <span className="font-semibold text-sm sm:text-base">
                           {formatCurrency(expense.amount)}
                         </span>
                         {canDelete && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-7 w-7 sm:h-8 sm:w-8 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={() => deleteExpense(expense.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
                           </Button>
                         )}
                       </div>

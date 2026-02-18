@@ -34,7 +34,7 @@ export function MonthlyOverview() {
       <LimitAlerts />
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card className="shadow-soft">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -91,13 +91,13 @@ export function MonthlyOverview() {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <OwnerComparisonChart />
         <MonthlyTrend />
       </div>
 
       {/* Owner Expense Lists and Limit Manager */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         <OwnerExpenseList owner="husband" />
         <OwnerExpenseList owner="wife" />
         <OwnerLimitManager />

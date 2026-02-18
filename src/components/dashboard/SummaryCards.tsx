@@ -12,7 +12,7 @@ export function SummaryCards() {
   const monthLabel = format(parseISO(`${currentMonth}-01`), 'MMMM yyyy');
   
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
       <SummaryCard
         title="Total Expenses"
         value={stats.totalExpense}
