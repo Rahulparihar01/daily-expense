@@ -49,7 +49,7 @@ export function DashboardLayout({ children, activeSection, onSectionChange }: Da
               </PopoverContent>
             </Popover>
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 sm:p-6">
             {children}
           </main>
         </SidebarInset>

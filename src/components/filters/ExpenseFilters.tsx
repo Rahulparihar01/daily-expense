@@ -80,10 +80,10 @@ export function ExpenseFilters() {
   return (
     <Card className="shadow-soft">
       <CardContent className="p-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Month Selector */}
           <Select value={currentMonth} onValueChange={setCurrentMonth}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -101,11 +101,11 @@ export function ExpenseFilters() {
             </SelectContent>
           </Select>
 
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-border hidden sm:block" />
 
           {/* Date Filter Type */}
           <Select value={filterType} onValueChange={(v) => handleDateTypeChange(v as any)}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="w-full sm:w-[130px]">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
