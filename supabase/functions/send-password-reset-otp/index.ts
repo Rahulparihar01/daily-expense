@@ -34,15 +34,27 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  const MIN_RESPONSE_TIME_MS = 2000; // Normalize response time to prevent timing-based email enumeration
+
+  // Helper to ensure consistent response timing
+  const sendResponse = async (response: Response): Promise<Response> => {
+    const elapsed = Date.now() - startTime;
+    if (elapsed < MIN_RESPONSE_TIME_MS) {
+      await new Promise(resolve => setTimeout(resolve, MIN_RESPONSE_TIME_MS - elapsed));
+    }
+    return response;
+  };
+
   try {
     const { email }: SendOTPRequest = await req.json();
     
     if (!email || !email.includes('@')) {
       console.log("Invalid email format provided");
-      return new Response(
+      return sendResponse(new Response(
         JSON.stringify({ error: "Please provide a valid email address" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      ));
     }
 
     const maskedEmail = maskEmail(email);
@@ -60,10 +72,10 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (userError) {
       console.error("Error checking user existence");
-      return new Response(
+      return sendResponse(new Response(
         JSON.stringify({ error: "An error occurred. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      ));
     }
 
     const userExists = users.users.some(u => u.email?.toLowerCase() === email.toLowerCase());
@@ -71,10 +83,10 @@ const handler = async (req: Request): Promise<Response> => {
     if (!userExists) {
       console.log("User lookup completed for:", maskedEmail);
       // Return generic message to prevent email enumeration
-      return new Response(
+      return sendResponse(new Response(
         JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      ));
     }
 
     // Rate limiting: Check for recent OTP requests (max 3 per hour)
@@ -91,10 +103,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (recentOTPs && recentOTPs.length >= 3) {
       console.log("Rate limit exceeded for:", maskedEmail);
-      return new Response(
+      return sendResponse(new Response(
         JSON.stringify({ error: "Too many reset requests. Please try again later." }),
         { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      ));
     }
 
     // Invalidate any existing unused OTPs for this email
@@ -125,10 +137,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (insertError) {
       console.error("Error storing OTP");
-      return new Response(
+      return sendResponse(new Response(
         JSON.stringify({ error: "Failed to generate reset code. Please try again." }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
+      ));
     }
 
     console.log("OTP generated and stored successfully for:", maskedEmail);
@@ -190,16 +202,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully for:", maskedEmail);
 
-    return new Response(
+    return sendResponse(new Response(
       JSON.stringify({ success: true, message: "If an account exists with this email, you will receive a reset code." }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    ));
   } catch (error: unknown) {
     console.error("Error in send-password-reset-otp:", error);
-    return new Response(
+    return sendResponse(new Response(
       JSON.stringify({ error: "An error occurred. Please try again." }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    ));
   }
 };
 
