@@ -8,6 +8,7 @@ import { ExpenseProvider } from "@/context/ExpenseContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
@@ -32,9 +33,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/auth" element={<Auth />} />
       <Route
-        path="/"
+        path="/app"
         element={
           <ProtectedRoute>
             <ExpenseProvider>
