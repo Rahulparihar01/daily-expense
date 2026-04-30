@@ -79,7 +79,7 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/app');
     }
   }, [user, navigate]);
 
@@ -100,7 +100,7 @@ export default function Auth() {
           title: 'Welcome back!',
           description: 'You have successfully logged in.',
         });
-        navigate('/');
+        navigate('/app');
       }
     } finally {
       setIsLoading(false);
