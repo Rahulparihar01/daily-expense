@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 
 const navItems = [
   { label: 'Home', href: '#home' },
@@ -113,7 +114,7 @@ const faqs = [
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -138,7 +139,12 @@ export default function Landing() {
     meta.setAttribute('content', desc);
   }, []);
 
-  const goToApp = () => navigate(user ? '/app' : '/auth');
+  const goToSignup = () => navigate(user ? '/app' : '/signup');
+  const goToLogin = () => navigate(user ? '/app' : '/login');
+  const handleSignOut = async () => {
+    await signOut();
+    toast({ title: 'Signed out', description: 'You have been signed out.' });
+  };
 
   const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -180,12 +186,25 @@ export default function Landing() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" onClick={goToApp}>
-              Sign In
-            </Button>
-            <Button onClick={goToApp} className="gap-2">
-              Get Started <ArrowRight className="h-4 w-4" />
-            </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" onClick={() => navigate('/app')} className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" /> Dashboard
+                </Button>
+                <Button variant="outline" onClick={handleSignOut} className="gap-2">
+                  <LogOut className="h-4 w-4" /> Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={goToLogin}>
+                  Sign In
+                </Button>
+                <Button onClick={goToSignup} className="gap-2">
+                  Sign Up <ArrowRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -210,9 +229,25 @@ export default function Landing() {
                   {item.label}
                 </a>
               ))}
-              <Button onClick={goToApp} className="mt-2 gap-2">
-                Get Started <ArrowRight className="h-4 w-4" />
-              </Button>
+              {user ? (
+                <>
+                  <Button onClick={() => { setMobileOpen(false); navigate('/app'); }} className="mt-2 gap-2">
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </Button>
+                  <Button variant="outline" onClick={() => { setMobileOpen(false); handleSignOut(); }} className="mt-2 gap-2">
+                    <LogOut className="h-4 w-4" /> Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => { setMobileOpen(false); goToLogin(); }} className="mt-2">
+                    Sign In
+                  </Button>
+                  <Button onClick={() => { setMobileOpen(false); goToSignup(); }} className="mt-2 gap-2">
+                    Sign Up <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </nav>
           </div>
         )}
@@ -246,8 +281,8 @@ export default function Landing() {
               and understand their money with beautiful charts and AI insights.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" onClick={goToApp} className="gap-2 h-12 px-7 text-base">
-                Get Started Free <ArrowRight className="h-4 w-4" />
+              <Button size="lg" onClick={goToSignup} className="gap-2 h-12 px-7 text-base">
+                {user ? 'Open Dashboard' : 'Get Started Free'} <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
                 size="lg"
@@ -339,7 +374,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button onClick={goToApp} className="mt-8 gap-2">
+              <Button onClick={goToSignup} className="mt-8 gap-2">
                 Start tracking now <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
