@@ -17,8 +17,12 @@ export function useExpenseDatabase(currentMonth: string) {
     if (!user) return;
     
     const startDate = `${currentMonth}-01`;
-    const endDate = new Date(parseInt(currentMonth.split('-')[0]), parseInt(currentMonth.split('-')[1]), 0)
-      .toISOString().split('T')[0];
+    const [yearStr, monthStr] = currentMonth.split('-');
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr);
+    // Last day of month — compute without timezone conversion
+    const lastDay = new Date(year, month, 0).getDate();
+    const endDate = `${currentMonth}-${String(lastDay).padStart(2, '0')}`;
 
     const { data, error } = await supabase
       .from('expenses')
