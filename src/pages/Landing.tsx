@@ -126,18 +126,6 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    document.title = 'ExpenseTrack — Effortless expense tracking for couples & individuals';
-    const desc =
-      'Track expenses, set budgets, and get AI-powered insights. Built for couples and individuals who want clarity over their money.';
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.setAttribute('name', 'description');
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute('content', desc);
-  }, []);
 
   const goToSignup = () => navigate(user ? '/app' : '/signup');
   const goToLogin = () => navigate(user ? '/app' : '/login');
