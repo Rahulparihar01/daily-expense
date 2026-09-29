@@ -50,7 +50,17 @@ serve(async (req) => {
       );
     }
 
-    const { messages, expenses, currentMonth } = await req.json();
+    const body = await req.json();
+    const { expenses, currentMonth } = body;
+    const rawMessages: unknown[] = Array.isArray(body?.messages) ? body.messages : [];
+    // Only allow user/assistant roles with string content; system instructions come from the server only
+    const messages = rawMessages
+      .filter((m): m is ChatMessage =>
+        !!m && typeof m === "object" &&
+        ((m as ChatMessage).role === "user" || (m as ChatMessage).role === "assistant") &&
+        typeof (m as ChatMessage).content === "string")
+      .slice(-30)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {

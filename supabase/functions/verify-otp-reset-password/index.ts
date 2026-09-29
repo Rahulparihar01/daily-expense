@@ -220,11 +220,12 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      // Mark OTP as used
+      // Mark all outstanding OTPs for this email as used after successful reset
       await supabaseAdmin
         .from("password_reset_otps")
         .update({ used: true })
-        .eq("id", otpRecord.id);
+        .eq("email", email.toLowerCase())
+        .eq("used", false);
 
       console.log("Password reset successfully for:", maskedEmail);
 

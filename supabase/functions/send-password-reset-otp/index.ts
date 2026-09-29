@@ -13,9 +13,16 @@ interface SendOTPRequest {
   email: string;
 }
 
-// Generate a 6-digit OTP
+// Generate a 6-digit OTP using a cryptographically secure RNG (rejection sampling)
 function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const buf = new Uint32Array(1);
+  const limit = Math.floor(0xFFFFFFFF / 900000) * 900000;
+  let v: number;
+  do {
+    crypto.getRandomValues(buf);
+    v = buf[0];
+  } while (v >= limit);
+  return (100000 + (v % 900000)).toString();
 }
 
 // Mask email for logging to protect PII
@@ -109,16 +116,9 @@ const handler = async (req: Request): Promise<Response> => {
       ));
     }
 
-    // Invalidate any existing unused OTPs for this email
-    const { error: invalidateError } = await supabaseAdmin
-      .from("password_reset_otps")
-      .update({ used: true })
-      .eq("email", email.toLowerCase())
-      .eq("used", false);
-
-    if (invalidateError) {
-      console.error("Error invalidating old OTPs");
-    }
+    // Note: existing codes are NOT invalidated here (an unauthenticated caller
+    // must not be able to revoke another user's code). Old codes expire in
+    // 10 minutes and all are invalidated after a successful reset.
 
     // Generate OTP
     const otp = generateOTP();
