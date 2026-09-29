@@ -48,9 +48,13 @@ export default function Login() {
     document.title = 'Sign in — ExpenseTrack';
   }, []);
 
+  // Safe same-origin return target (used by the agent connection approval screen)
+  const nextParam = new URLSearchParams(window.location.search).get('next');
+  const redirectTarget = nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/app';
+
   useEffect(() => {
-    if (user) navigate('/app', { replace: true });
-  }, [user, navigate]);
+    if (user) navigate(redirectTarget, { replace: true });
+  }, [user, navigate, redirectTarget]);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -79,7 +83,7 @@ export default function Login() {
         });
       } else {
         toast({ title: 'Welcome back!', description: 'You have successfully logged in.' });
-        navigate('/app', { replace: true });
+        navigate(redirectTarget, { replace: true });
       }
     } finally {
       setLoading(false);
