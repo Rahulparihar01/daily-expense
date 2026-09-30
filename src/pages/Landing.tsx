@@ -12,9 +12,6 @@ import {
   Menu,
   X,
   Mail,
-  Github,
-  Twitter,
-  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +20,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { LogOut, LayoutDashboard } from 'lucide-react';
@@ -33,7 +28,6 @@ const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'Features', href: '#features' },
   { label: 'About', href: '#about' },
-  { label: 'Testimonials', href: '#testimonials' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ];
@@ -68,24 +62,6 @@ const features = [
     icon: Wallet,
     title: 'Income & Balance',
     description: 'Log monthly income and see exactly what’s left after every expense.',
-  },
-];
-
-const testimonials = [
-  {
-    name: 'Priya & Rahul',
-    role: 'Couple, Bengaluru',
-    quote: 'Finally we both see the same numbers. No more arguments about who spent what — it’s right there.',
-  },
-  {
-    name: 'Aman Verma',
-    role: 'Freelance Designer',
-    quote: 'The AI chat is brilliant. I just type “how much on food this month?” and it answers instantly.',
-  },
-  {
-    name: 'Sneha Kapoor',
-    role: 'Product Manager',
-    quote: 'Clean, fast, and the monthly limits actually changed how I spend. Love the green theme too.',
   },
 ];
 
@@ -132,15 +108,6 @@ export default function Landing() {
   const handleSignOut = async () => {
     await signOut();
     toast({ title: 'Signed out', description: 'You have been signed out.' });
-  };
-
-  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    toast({
-      title: 'Message sent',
-      description: 'Thanks for reaching out — we’ll reply within 24 hours.',
-    });
-    (e.target as HTMLFormElement).reset();
   };
 
   return (
@@ -408,40 +375,6 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* TESTIMONIALS */}
-        <section id="testimonials" className="py-20 md:py-28 bg-secondary/40">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Loved by people who hate spreadsheets
-              </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
-                Honest words from real users.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-5">
-              {testimonials.map((t) => (
-                <div
-                  key={t.name}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-soft"
-                >
-                  <div className="text-primary text-3xl leading-none mb-3">“</div>
-                  <p className="text-sm leading-relaxed mb-5">{t.quote}</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center font-semibold text-primary">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* FAQ */}
         <section id="faq" className="py-20 md:py-28">
           <div className="container mx-auto px-4 max-w-3xl">
@@ -478,63 +411,30 @@ export default function Landing() {
 
         {/* CONTACT / CTA */}
         <section id="contact" className="py-20 md:py-28 bg-secondary/40">
-          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-10 md:gap-16 max-w-5xl">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Ready to take control?
-              </h2>
-              <p className="text-muted-foreground text-lg mb-6">
-                Send us a message or jump straight in — your dashboard is one click away.
-              </p>
-              <div className="space-y-3">
-                <a
-                  href="mailto:hello@expensetrack.app"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email us</p>
-                    <p className="font-medium text-sm">hello@expensetrack.app</p>
-                  </div>
-                </a>
-                <a
-                  href="https://wa.me/919999999999"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Chat on WhatsApp</p>
-                    <p className="font-medium text-sm">Usually reply within an hour</p>
-                  </div>
-                </a>
-              </div>
-            </div>
-            <form
-              onSubmit={handleContactSubmit}
-              className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4"
+          <div className="container mx-auto px-4 text-center max-w-2xl">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              Ready to take control?
+            </h2>
+            <p className="text-muted-foreground text-lg mb-6">
+              Questions or feedback? Reach us any time by email.
+            </p>
+            <a
+              href="mailto:rahulparihar01aug@gmail.com"
+              className="inline-flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
             >
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Name</label>
-                <Input required placeholder="Your name" />
+              <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
+                <Mail className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Email</label>
-                <Input required type="email" placeholder="you@example.com" />
+                <p className="text-xs text-muted-foreground">Email us</p>
+                <p className="font-medium text-sm">rahulparihar01aug@gmail.com</p>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Message</label>
-                <Textarea required rows={4} placeholder="How can we help?" />
-              </div>
-              <Button type="submit" className="w-full gap-2">
-                Send message <ArrowRight className="h-4 w-4" />
+            </a>
+            <div className="mt-8">
+              <Button onClick={goToSignup} className="gap-2 h-12 px-7 text-base">
+                {user ? 'Open Dashboard' : 'Get Started Free'} <ArrowRight className="h-4 w-4" />
               </Button>
-            </form>
+            </div>
           </div>
         </section>
       </main>
@@ -553,29 +453,12 @@ export default function Landing() {
               Effortless expense tracking for couples and individuals. Clarity over your money,
               every single day.
             </p>
-            <div className="flex items-center gap-2 mt-5">
-              <a
-                href="#"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="GitHub"
-              >
-                <Github className="h-4 w-4" />
-              </a>
-              <a
-                href="mailto:hello@expensetrack.app"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="Email"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
-            </div>
+            <a
+              href="mailto:rahulparihar01aug@gmail.com"
+              className="inline-flex items-center gap-2 mt-5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Mail className="h-4 w-4" /> rahulparihar01aug@gmail.com
+            </a>
           </div>
           <div>
             <p className="font-semibold text-sm mb-3">Product</p>
@@ -589,9 +472,14 @@ export default function Landing() {
           <div>
             <p className="font-semibold text-sm mb-3">Contact</p>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>hello@expensetrack.app</li>
-              <li>+91 99999 99999</li>
-              <li><a href="#contact" className="hover:text-foreground">Contact form</a></li>
+              <li>
+                <a
+                  href="mailto:rahulparihar01aug@gmail.com"
+                  className="hover:text-foreground"
+                >
+                  rahulparihar01aug@gmail.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -606,16 +494,6 @@ export default function Landing() {
         </div>
       </footer>
 
-      {/* Floating WhatsApp */}
-      <a
-        href="https://wa.me/919999999999"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat on WhatsApp"
-        className="fixed bottom-5 right-5 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </a>
     </div>
   );
 }
