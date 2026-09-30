@@ -110,15 +110,6 @@ export default function Landing() {
     toast({ title: 'Signed out', description: 'You have been signed out.' });
   };
 
-  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    toast({
-      title: 'Message sent',
-      description: 'Thanks for reaching out — we’ll reply within 24 hours.',
-    });
-    (e.target as HTMLFormElement).reset();
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAV */}
@@ -380,40 +371,6 @@ export default function Landing() {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* TESTIMONIALS */}
-        <section id="testimonials" className="py-20 md:py-28 bg-secondary/40">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Loved by people who hate spreadsheets
-              </h2>
-              <p className="mt-4 text-muted-foreground text-lg">
-                Honest words from real users.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-5">
-              {testimonials.map((t) => (
-                <div
-                  key={t.name}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-soft"
-                >
-                  <div className="text-primary text-3xl leading-none mb-3">“</div>
-                  <p className="text-sm leading-relaxed mb-5">{t.quote}</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center font-semibold text-primary">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
