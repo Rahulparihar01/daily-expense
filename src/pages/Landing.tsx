@@ -453,29 +453,12 @@ export default function Landing() {
               Effortless expense tracking for couples and individuals. Clarity over your money,
               every single day.
             </p>
-            <div className="flex items-center gap-2 mt-5">
-              <a
-                href="#"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="GitHub"
-              >
-                <Github className="h-4 w-4" />
-              </a>
-              <a
-                href="mailto:hello@expensetrack.app"
-                className="h-9 w-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
-                aria-label="Email"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
-            </div>
+            <a
+              href="mailto:rahulparihar01aug@gmail.com"
+              className="inline-flex items-center gap-2 mt-5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Mail className="h-4 w-4" /> rahulparihar01aug@gmail.com
+            </a>
           </div>
           <div>
             <p className="font-semibold text-sm mb-3">Product</p>
@@ -489,9 +472,14 @@ export default function Landing() {
           <div>
             <p className="font-semibold text-sm mb-3">Contact</p>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>hello@expensetrack.app</li>
-              <li>+91 99999 99999</li>
-              <li><a href="#contact" className="hover:text-foreground">Contact form</a></li>
+              <li>
+                <a
+                  href="mailto:rahulparihar01aug@gmail.com"
+                  className="hover:text-foreground"
+                >
+                  rahulparihar01aug@gmail.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>
