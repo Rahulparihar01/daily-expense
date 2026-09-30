@@ -12,9 +12,6 @@ import {
   Menu,
   X,
   Mail,
-  Github,
-  Twitter,
-  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +20,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { LogOut, LayoutDashboard } from 'lucide-react';
@@ -33,7 +28,6 @@ const navItems = [
   { label: 'Home', href: '#home' },
   { label: 'Features', href: '#features' },
   { label: 'About', href: '#about' },
-  { label: 'Testimonials', href: '#testimonials' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ];
@@ -68,24 +62,6 @@ const features = [
     icon: Wallet,
     title: 'Income & Balance',
     description: 'Log monthly income and see exactly what’s left after every expense.',
-  },
-];
-
-const testimonials = [
-  {
-    name: 'Priya & Rahul',
-    role: 'Couple, Bengaluru',
-    quote: 'Finally we both see the same numbers. No more arguments about who spent what — it’s right there.',
-  },
-  {
-    name: 'Aman Verma',
-    role: 'Freelance Designer',
-    quote: 'The AI chat is brilliant. I just type “how much on food this month?” and it answers instantly.',
-  },
-  {
-    name: 'Sneha Kapoor',
-    role: 'Product Manager',
-    quote: 'Clean, fast, and the monthly limits actually changed how I spend. Love the green theme too.',
   },
 ];
 
