@@ -411,63 +411,30 @@ export default function Landing() {
 
         {/* CONTACT / CTA */}
         <section id="contact" className="py-20 md:py-28 bg-secondary/40">
-          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-10 md:gap-16 max-w-5xl">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Ready to take control?
-              </h2>
-              <p className="text-muted-foreground text-lg mb-6">
-                Send us a message or jump straight in — your dashboard is one click away.
-              </p>
-              <div className="space-y-3">
-                <a
-                  href="mailto:hello@expensetrack.app"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email us</p>
-                    <p className="font-medium text-sm">hello@expensetrack.app</p>
-                  </div>
-                </a>
-                <a
-                  href="https://wa.me/919999999999"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Chat on WhatsApp</p>
-                    <p className="font-medium text-sm">Usually reply within an hour</p>
-                  </div>
-                </a>
-              </div>
-            </div>
-            <form
-              onSubmit={handleContactSubmit}
-              className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4"
+          <div className="container mx-auto px-4 text-center max-w-2xl">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              Ready to take control?
+            </h2>
+            <p className="text-muted-foreground text-lg mb-6">
+              Questions or feedback? Reach us any time by email.
+            </p>
+            <a
+              href="mailto:rahulparihar01aug@gmail.com"
+              className="inline-flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:shadow-soft transition-all"
             >
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Name</label>
-                <Input required placeholder="Your name" />
+              <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center">
+                <Mail className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Email</label>
-                <Input required type="email" placeholder="you@example.com" />
+                <p className="text-xs text-muted-foreground">Email us</p>
+                <p className="font-medium text-sm">rahulparihar01aug@gmail.com</p>
               </div>
-              <div>
-                <label className="text-sm font-medium mb-1.5 block">Message</label>
-                <Textarea required rows={4} placeholder="How can we help?" />
-              </div>
-              <Button type="submit" className="w-full gap-2">
-                Send message <ArrowRight className="h-4 w-4" />
+            </a>
+            <div className="mt-8">
+              <Button onClick={goToSignup} className="gap-2 h-12 px-7 text-base">
+                {user ? 'Open Dashboard' : 'Get Started Free'} <ArrowRight className="h-4 w-4" />
               </Button>
-            </form>
+            </div>
           </div>
         </section>
       </main>
